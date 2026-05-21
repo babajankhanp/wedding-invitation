@@ -3485,9 +3485,9 @@
                 wrap.classList.add('doors-open');
                 // play a soft "open" tone if the user has enabled ambient sound
                 if (audio.enabled) playChime();
-                // smooth-scroll to Bismillah after the doors finish swinging
+                // smooth-scroll to Couple section after the doors finish swinging
                 setTimeout(() => {
-                    document.getElementById('bismillah').scrollIntoView({ behavior: 'smooth' });
+                    document.getElementById('couple').scrollIntoView({ behavior: 'smooth' });
                 }, 1100);
             }
             btn.addEventListener('click', openDoors);
