@@ -2389,6 +2389,274 @@
     }
 
     /* ════════════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE — phones ≤ 480 px
+   ════════════════════════════════════════════════════════════════════ */
+    @media (max-width: 480px) {
+
+      /* --- Global section padding --- */
+      section {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      /* --- Ambient toggle (keep it small & out of the way) --- */
+      .ambient-toggle {
+        top: 10px;
+        right: 10px;
+        width: 38px;
+        height: 38px;
+      }
+
+      .ambient-toggle svg {
+        width: 17px;
+        height: 17px;
+      }
+
+      /* --- Cover: fill the full viewport, no side bleed --- */
+      .doors-wrap {
+        width: 100vw;
+        /* use dvh where supported so chrome-bar is excluded */
+        height: 100dvh;
+        height: 100vh;
+        border-radius: 0;
+      }
+
+      .cover-medallion-img {
+        width: clamp(130px, 40vw, 190px);
+        height: clamp(130px, 40vw, 190px);
+      }
+
+      .cover-banner {
+        font-size: 9px;
+        padding: 8px 16px;
+        letter-spacing: .18em;
+      }
+
+      /* Hide the decorative side lines — they're too wide on small screens */
+      .cover-banner::before,
+      .cover-banner::after {
+        display: none;
+      }
+
+      .cover-names {
+        font-size: clamp(1.6rem, 7vw, 2.2rem);
+        margin-top: 16px;
+      }
+
+      .open-btn {
+        margin-top: 22px;
+        padding: 12px 22px;
+        font-size: 11px;
+        letter-spacing: .25em;
+      }
+
+      .sacred-786 {
+        top: 12px;
+        right: 12px;
+        font-size: 13px;
+      }
+
+      /* --- Bismillah section badge --- */
+      .badge-786 {
+        width: 50px;
+        height: 50px;
+        font-size: 14px;
+        top: 12px;
+        right: 12px;
+      }
+
+      .badge-786 .star-crescent {
+        width: 13px;
+        height: 13px;
+      }
+
+      /* --- Blessings: hide side florals that overlap on narrow screens --- */
+      .side-floral {
+        display: none;
+      }
+
+      .blessings-card {
+        padding: 40px 18px;
+      }
+
+      /* --- Couple section --- */
+      .couple-full-content {
+        padding: 36px 16px 28px;
+      }
+
+      .couple-amp {
+        font-size: 2.4rem;
+        padding: 4px 0;
+        align-self: center;
+      }
+
+      /* --- Nikah card: widen overlay & scale text down --- */
+      .nikah-card-wrap {
+        width: 70%;
+        top: 33%;
+      }
+
+      .nikah-title-script {
+        font-size: clamp(1.9rem, 7vw, 2.8rem);
+      }
+
+      .nikah-date-num {
+        font-size: clamp(1.4rem, 5vw, 2rem);
+      }
+
+      .nikah-day,
+      .nikah-month,
+      .nikah-time {
+        font-size: clamp(.58rem, 1.8vw, .78rem);
+      }
+
+      .nikah-venue {
+        font-size: clamp(.65rem, 2vw, .85rem);
+      }
+
+      .nikah-btns {
+        flex-direction: column;
+        align-items: center;
+        width: min(90vw, 320px);
+      }
+
+      .nikah-btns .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      /* --- Events timeline --- */
+      .event-card {
+        padding: 22px 16px;
+      }
+
+      .event-btns {
+        flex-direction: column;
+      }
+
+      .event-btns .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      /* --- Countdown --- */
+      .cd-grid {
+        gap: 8px;
+      }
+
+      .cd-card {
+        min-width: 64px;
+        padding: 16px 10px;
+      }
+
+      .cd-num {
+        font-size: clamp(1.8rem, 4.5vw, 2.4rem);
+      }
+
+      /* --- Venue maps --- */
+      .venue-map {
+        height: 200px;
+      }
+
+      .venue-body {
+        padding: 18px;
+      }
+
+      /* --- DUA / illuminated card --- */
+      .illuminated {
+        padding: 36px 18px;
+      }
+
+      /* --- RSVP --- */
+      .rsvp-card {
+        padding: 32px 18px;
+      }
+
+      /* --- Contact --- */
+      #contact {
+        padding: 52px 16px 18px;
+      }
+
+      .phone-grid {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+
+      .phone-btn {
+        justify-content: center;
+      }
+
+      /* --- Confirmation modal --- */
+      .modal {
+        padding: 32px 20px;
+        max-width: calc(100vw - 32px);
+        margin: 0 16px;
+      }
+
+      .crescent-anim {
+        width: 60px;
+        height: 60px;
+      }
+
+      .modal h3 {
+        font-size: 1.4rem;
+      }
+
+      /* --- Nikkah Mubarak section --- */
+      .nm-content {
+        padding: 36px 16px;
+      }
+
+      .nm-arabic {
+        font-size: clamp(2rem, 6vw, 3rem);
+      }
+
+      .nm-title {
+        font-size: clamp(2.4rem, 7vw, 3.5rem);
+      }
+
+      .nm-btns {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .nm-btns .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    /* ════════════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE — small tablets / large phones 481–768 px
+   ════════════════════════════════════════════════════════════════════ */
+    @media (min-width: 481px) and (max-width: 768px) {
+
+      .side-floral {
+        width: clamp(55px, 7vw, 95px);
+        opacity: 0.3;
+      }
+
+      .nikah-card-wrap {
+        width: 62%;
+      }
+
+      .phone-grid {
+        gap: 12px;
+      }
+
+      .nm-btns {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .nm-btns .btn {
+        width: min(280px, 80vw);
+        justify-content: center;
+      }
+    }
+
+    /* ════════════════════════════════════════════════════════════════════
    PRINT STYLES
    ════════════════════════════════════════════════════════════════════ */
     @media print {
