@@ -2811,7 +2811,12 @@
     <!-- Floating particles (gold dots + rose petals) -->
     <div class="particles" aria-hidden="true" id="particles"></div>
 
-    <!-- Ambient sound toggle (top-right) — uses Web Audio for a soft tone -->
+    <!-- Wedding nasheed (hidden); controlled by toggle and door open -->
+    <audio id="nasheed" loop preload="auto" autoplay aria-hidden="true">
+        <source src="Audio/ssvid.net--Wedding-Nasheed-Muhammad-Al-Muqit-English-Lyrics_128kbps.m4a.mp3" type="audio/mpeg" />
+    </audio>
+
+    <!-- Ambient sound toggle (top-right) -->
     <button class="ambient-toggle" id="ambientToggle" aria-label="Toggle ambient sound" title="Toggle ambient sound">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" id="soundIcon">
             <path d="M11 5L6 9H2v6h4l5 4V5z" stroke-linecap="round" stroke-linejoin="round" />
@@ -3749,8 +3754,8 @@
                 if (opened) return;
                 opened = true;
                 wrap.classList.add('doors-open');
-                // play a soft "open" tone if the user has enabled ambient sound
-                if (audio.enabled) playChime();
+                // ensure nasheed is playing when doors open (helps if autoplay was blocked)
+                audio.ensurePlaying();
                 // smooth-scroll to Couple section after the doors finish swinging
                 setTimeout(() => {
                     document.getElementById('couple').scrollIntoView({ behavior: 'smooth' });
@@ -3949,78 +3954,95 @@
         })();
 
         /* ════════════════════════════════════════════════════════════════════
-           10. AMBIENT SOUND — a very soft, sustained drone made with Web
-           Audio. No external files; respects the user's tap-to-enable
-           gesture requirement for autoplay.
+           10. WEDDING NASHEED — plays by default; toggle mutes. Browsers may
+           block autoplay until the first tap (unlock listener below).
            ════════════════════════════════════════════════════════════════════ */
         const audio = (function ambient() {
             const btn = document.getElementById('ambientToggle');
             const icon = document.getElementById('soundIcon');
-            let ctx, master, osc1, osc2, lfo, lfoGain, started = false;
-            const state = { enabled: false };
+            const track = document.getElementById('nasheed');
+            const state = { enabled: true, track };
+            const PLAY_VOL = 0.45;
+            const ICON_ON = '<path d="M11 5L6 9H2v6h4l5 4V5z" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07" stroke-linecap="round"/>';
+            const ICON_OFF = '<path d="M11 5L6 9H2v6h4l5 4V5z" stroke-linecap="round" stroke-linejoin="round"/><line x1="23" y1="9"  x2="17" y2="15" stroke-linecap="round"/><line x1="17" y1="9"  x2="23" y2="15" stroke-linecap="round"/>';
+            let fadeId = null;
+            let unlockBound = false;
 
-            function start() {
-                if (started) return;
-                ctx = new (window.AudioContext || window.webkitAudioContext)();
-                master = ctx.createGain();
-                master.gain.value = 0;
-                master.connect(ctx.destination);
-
-                // Two slightly detuned sine oscillators — gentle drone resembling an oud-like sustain
-                osc1 = ctx.createOscillator(); osc1.type = 'sine'; osc1.frequency.value = 196.00; // G3
-                osc2 = ctx.createOscillator(); osc2.type = 'sine'; osc2.frequency.value = 293.66; // D4
-                const g1 = ctx.createGain(); g1.gain.value = .25;
-                const g2 = ctx.createGain(); g2.gain.value = .18;
-                osc1.connect(g1); osc2.connect(g2);
-                g1.connect(master); g2.connect(master);
-
-                // slow LFO for breathing volume
-                lfo = ctx.createOscillator(); lfo.frequency.value = 0.12;
-                lfoGain = ctx.createGain(); lfoGain.gain.value = 0.05;
-                lfo.connect(lfoGain); lfoGain.connect(master.gain);
-
-                osc1.start(); osc2.start(); lfo.start();
-                started = true;
+            function fadeVolume(target, ms = 800) {
+                if (!track) return;
+                cancelAnimationFrame(fadeId);
+                const start = track.volume;
+                const t0 = performance.now();
+                function step(now) {
+                    const p = Math.min(1, (now - t0) / ms);
+                    track.volume = start + (target - start) * p;
+                    if (p < 1) fadeId = requestAnimationFrame(step);
+                    else track.volume = target;
+                }
+                fadeId = requestAnimationFrame(step);
             }
-            function fadeTo(target, ms = 800) {
-                if (!master) return;
-                const now = ctx.currentTime;
-                master.gain.cancelScheduledValues(now);
-                master.gain.setValueAtTime(master.gain.value, now);
-                master.gain.linearRampToValueAtTime(target, now + ms / 1000);
+
+            function playNasheed(fromStart) {
+                if (!track || !state.enabled) return Promise.resolve();
+                if (fromStart) track.currentTime = 0;
+                return track.play().catch(() => {});
+            }
+
+            function setIcon(on) {
+                if (icon) icon.innerHTML = on ? ICON_ON : ICON_OFF;
+            }
+
+            function startNasheed(fromStart, fadeMs = 1400) {
+                if (!state.enabled) return;
+                track.volume = 0;
+                playNasheed(fromStart).then(() => fadeVolume(PLAY_VOL, fadeMs));
+                setIcon(true);
+            }
+
+            function bindUnlock() {
+                if (unlockBound || !track) return;
+                unlockBound = true;
+                const unlock = () => {
+                    if (state.enabled && track.paused) startNasheed(false, 800);
+                };
+                document.addEventListener('pointerdown', unlock, { once: true });
+                document.addEventListener('keydown', unlock, { once: true });
+            }
+
+            function ensurePlaying() {
+                if (!state.enabled || !track) return;
+                if (track.paused) startNasheed(false, 600);
+                else fadeVolume(PLAY_VOL, 400);
             }
 
             btn && btn.addEventListener('click', () => {
-                if (!started) start();
                 state.enabled = !state.enabled;
                 if (state.enabled) {
-                    fadeTo(0.08, 1200);
-                    icon.innerHTML = '<path d="M11 5L6 9H2v6h4l5 4V5z" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07" stroke-linecap="round"/>';
+                    startNasheed(false, 1200);
                 } else {
-                    fadeTo(0, 600);
-                    icon.innerHTML = '<path d="M11 5L6 9H2v6h4l5 4V5z" stroke-linecap="round" stroke-linejoin="round"/><line x1="23" y1="9"  x2="17" y2="15" stroke-linecap="round"/><line x1="17" y1="9"  x2="23" y2="15" stroke-linecap="round"/>';
+                    fadeVolume(0, 600);
+                    setTimeout(() => {
+                        track.pause();
+                        track.currentTime = 0;
+                    }, 650);
+                    setIcon(false);
                 }
             });
 
+            // Default: play on load (unlock on first tap if the browser blocks autoplay)
+            setIcon(true);
+            track.volume = 0;
+            playNasheed(false).then(() => {
+                if (track.paused) bindUnlock();
+                else fadeVolume(PLAY_VOL, 1400);
+            });
+
+            state.playNasheed = playNasheed;
+            state.fadeVolume = fadeVolume;
+            state.ensurePlaying = ensurePlaying;
+            state.PLAY_VOL = PLAY_VOL;
             return state;
         })();
-
-        // brief soft chime when doors open (uses the same audio context if running)
-        function playChime() {
-            try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const o = ctx.createOscillator(), g = ctx.createGain();
-                o.type = 'triangle'; o.frequency.value = 880;
-                g.gain.value = 0;
-                o.connect(g); g.connect(ctx.destination);
-                o.start();
-                const t = ctx.currentTime;
-                g.gain.linearRampToValueAtTime(0.15, t + 0.05);
-                g.gain.exponentialRampToValueAtTime(0.001, t + 1.4);
-                o.frequency.exponentialRampToValueAtTime(1318.5, t + 0.6); // glide up to E6
-                o.stop(t + 1.5);
-            } catch (e) { }
-        }
 
         /* ════════════════════════════════════════════════════════════════════
            11. KEYBOARD ACCESSIBILITY — Escape closes the modal
